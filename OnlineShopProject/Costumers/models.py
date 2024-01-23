@@ -16,3 +16,4 @@ class Address(models.Model):
     
     state = models.CharField()
     city = models.CharField()
+    
