@@ -27,4 +27,4 @@ class Address(models.Model):
     extra_description = models.TextField()
     
     def __str__(self):
-        return self.id
+        return f"{self.id} - {self.costumer}"
