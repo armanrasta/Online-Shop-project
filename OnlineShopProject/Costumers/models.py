@@ -14,7 +14,6 @@ class Costumer(models.Model):
     def __str__(self):
         return self.username
     
-    
 class Address(models.Model):
     
     costumer = models.ForeignKey(Costumer, on_delete=models.CASCADE)
