@@ -26,4 +26,3 @@ class DoSMiddleware:
     def __call__(self,request):
          return self.process_request(request) or self.get_response(request)
 
-# settings.py
