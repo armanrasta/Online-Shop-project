@@ -2,8 +2,9 @@ from django.db import models
 from Costumers.models import Costumer
 from Product.models import Product, DiscountCodes
 import uuid
+from core.models import BaseModel
 
-class Order(models.Model):
+class Order(BaseModel):
     class PaymentChoices(models.TextChoices):
         Online = "OL", ("Online")
         OnDoor = "OD", ("OnDoor")
@@ -27,24 +28,26 @@ class Order(models.Model):
     def __str__(self):
         return f'{str(self.id)}'
 
-    def save(self):
+    def save(self, *args, **kwargs):
         self.amount = sum(item.get_cost() for item in self.items.all())
         if self.discount:
             if self.discount.type == 'F':
-                return self.amount - self.discount.amount
+                self.total_price = self.amount - self.discount.amount
             elif self.discount.type == 'P':
-                return self.amount * (1 - self.discount.amount / 100)
-
-class OrderItem(models.Model):
+                self.total_price = self.amount * (1 - self.discount.amount / 100)
+        super().save(*args, **kwargs)
+        
+class OrderItem(BaseModel):
     
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_items')
     item = models.ForeignKey(Product, on_delete=models.DO_NOTHING)
     quantity = models.IntegerField(default=1)
-
+    add_date = models.DateTimeField(auto_now_add = True)
+    
     def get_cost(self):
         return self.item.price * self.quantity
 
-class Transaction(models.Model):
+class Transaction(BaseModel):
     
     payment_method_choices = (
         ('CA', 'Cash'),
@@ -68,8 +71,9 @@ class Transaction(models.Model):
     refund_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     refund_reason = models.TextField(null=True, blank=True)
     
-    def save(self):
+    def save(self, *args, **kwargs):
         self.amount = self.order.amount
+        super().save(*args, **kwargs)
         
     def __str__(self):
         return self.transaction_id
