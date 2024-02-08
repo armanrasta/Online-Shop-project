@@ -1,9 +1,11 @@
 from django.shortcuts import render
+from rest_framework import generics
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
-from .models import Product,Category,DiscountCodes
-from .serializers import ProductSerializer,CategorySerializer,DiscountSerializer
+from .models import Product,Category,DiscountCodes,Comment
+from .serializers import ProductSerializer,CategorySerializer,DiscountSerializer,CommentSerializer
 
 # Create your views here.
 
@@ -96,3 +98,20 @@ def discount_codes_detail(request, pk):
     elif request.method == 'DELETE':
         discount_code.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class ProductList(generics.ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    pagination_class = PageNumberPagination
+
+class ProductDetail(generics.RetrieveAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+class CommentListCreateAPIView(generics.ListCreateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+
+class CommentRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer

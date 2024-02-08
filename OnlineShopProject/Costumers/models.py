@@ -11,6 +11,8 @@ class Costumer(models.Model):
     phone_number = PhoneNumberField(null=False, blank=False, unique=True, max_length = 11)
     email = models.EmailField(null=False, blank=False, unique=True, max_length=254)
     password = models.CharField(null=False,max_length = 1000)
+    otp_code = models.CharField(max_length=6, null=True, blank=True)
+    
     
     def __str__(self):
         return self.username
