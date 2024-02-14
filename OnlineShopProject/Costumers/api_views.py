@@ -68,4 +68,3 @@ def sign_up_with_otp(request):
         return Response({'success': 'Sign up successful. OTP sent to your email'}, status=status.HTTP_201_CREATED)
 
     return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-

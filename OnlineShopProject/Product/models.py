@@ -5,7 +5,7 @@ class Category(BaseModel):
     name = models.CharField(max_length=255)
     is_subcat = models.BooleanField(default=False)
     parent_category = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='subcat', limit_choices_to={'is_subcat': False})
-    pic = models.ImageField(upload_to="static/img")
+    pic = models.ImageField(upload_to="Media/cateogry_img")
     
     def __str__(self):
         return self.name
@@ -17,7 +17,7 @@ class Product(BaseModel):
     category = models.ForeignKey(Category, limit_choices_to={'is_subcat': True}, verbose_name="Selected Subcategory", on_delete=models.CASCADE)
     price = models.IntegerField()
     manufator_date = models.DateField()
-    pic = models.ImageField(upload_to="static/img")
+    pic = models.ImageField(upload_to="Media/product_img")
     
     def __str__(self):
         return f"{self.brand} - {self.name}"
@@ -31,7 +31,8 @@ class DiscountCodes(BaseModel):
     def __str__(self):
         return self.code
     
-class Comment(BaseModel):   
+class Comment(BaseModel): 
+      
     rating_choices = (
         ("1", "1"),
         ("2", "2"),
