@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models.query import QuerySet
+from django.contrib.auth.models import Permission
 
 class SoftDeleteQuerySet(QuerySet):
     def delete(self):
@@ -22,3 +23,12 @@ class BaseModel(models.Model):
     def delete(self, using=None, keep_parents=False):
         self.is_deleted = True
         self.save()
+        
+
+class CustomUserPermissions:
+    class Meta:
+        permissions = (
+            ("edit_or_add_category", "Can edit or add category"),
+            ("edit_or_add_product", "Can edit or add products"),
+        )
+        

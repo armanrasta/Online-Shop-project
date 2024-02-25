@@ -1,16 +1,14 @@
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
 from Product.models import Product
-class Costumer(models.Model):
+class Costumer(AbstractUser):
     
-    user = models.OneToOneField(User,blank = True, null = True, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     username = models.CharField(null=False, blank=False, unique=True, max_length = 32)
     phone_number = PhoneNumberField(null=False, blank=False, unique=True, max_length = 11)
     email = models.EmailField(null=False, blank=False, unique=True, max_length=254)
-    password = models.CharField(null=False,max_length = 1000)
     otp_code = models.CharField(max_length=6, null=True, blank=True)
     
     
