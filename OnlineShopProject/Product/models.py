@@ -41,6 +41,6 @@ class Comment(BaseModel):
         ("5", "5")
     )
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    User = models.ForeignKey('Costumers.Costumer', on_delete=models.DO_NOTHING)
+    User = models.ForeignKey('Customers.Customer', on_delete=models.DO_NOTHING)
     Comment = models.TextField(max_length=2000)
     rating = models.IntegerField(choices=rating_choices)

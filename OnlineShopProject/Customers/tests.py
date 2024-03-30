@@ -1,11 +1,11 @@
 from django.test import TestCase
 from phonenumber_field.phonenumber import PhoneNumber
-from .models import Costumer, Address
+from .models import Customer, Address
 
-class CostumerModelTest(TestCase):
+class CustomerModelTest(TestCase):
 
     def setUp(self):
-        self.costumer = Costumer.objects.create(
+        self.Customer = Customer.objects.create(
             first_name='John',
             last_name='Doe',
             username='johndoe',
@@ -14,13 +14,13 @@ class CostumerModelTest(TestCase):
             password='hashed_password'
         )
 
-    def test_costumer_str_method(self):
-        self.assertEqual(str(self.costumer), 'johndoe')
+    def test_Customer_str_method(self):
+        self.assertEqual(str(self.Customer), 'johndoe')
 
 class AddressModelTest(TestCase):
 
     def setUp(self):
-        self.costumer = Costumer.objects.create(
+        self.Customer = Customer.objects.create(
             first_name='John',
             last_name='Doe',
             username='johndoe',
@@ -30,7 +30,7 @@ class AddressModelTest(TestCase):
         )
 
         self.address = Address.objects.create(
-            costumer=self.costumer,
+            Customer=self.Customer,
             state='California',
             city='Los Angeles',
             full_address='123 Main St',
@@ -41,5 +41,5 @@ class AddressModelTest(TestCase):
         )
 
     def test_address_str_method(self):
-        expected_str = f"{self.address.id} - {self.costumer}"
+        expected_str = f"{self.address.id} - {self.Customer}"
         self.assertEqual(str(self.address), expected_str)

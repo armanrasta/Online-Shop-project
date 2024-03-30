@@ -1,5 +1,5 @@
 from django.db import models
-from Costumers.models import Costumer
+from Customers.models import Customer
 from Product.models import Product, DiscountCodes
 import uuid
 from core.models import BaseModel
@@ -16,11 +16,9 @@ class Order(BaseModel):
         InProgress = "I", ("IN progress")
 
     amount = models.DecimalField(max_digits=12, decimal_places=2)
-    customer = models.ForeignKey(Costumer, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     discount = models.ForeignKey(DiscountCodes, on_delete=models.DO_NOTHING)
     total_price = models.DecimalField(null=True, decimal_places=3, max_digits=20)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
     description = models.TextField(null=True)
     status = models.CharField(choices=StatusChoices, default=StatusChoices.InProgress, max_length=30)
     items = models.ManyToManyField("OrderItem", related_name='orders')
@@ -65,7 +63,7 @@ class Transaction(BaseModel):
     payment_method = models.CharField(choices = payment_method_choices)
     transaction_id = models.UUIDField(default = uuid.uuid4, editable = False, unique = True)
     order = models.ForeignKey(Order, on_delete = models.DO_NOTHING)
-    customer = models.ForeignKey(Costumer, on_delete=models.DO_NOTHING)
+    customer = models.ForeignKey(Customer, on_delete=models.DO_NOTHING)
     timestamp = models.DateTimeField(auto_now_add=True)
     description = models.TextField()
     refund_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)

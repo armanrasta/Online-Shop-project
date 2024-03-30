@@ -5,7 +5,7 @@ from rest_framework import status
 from .models import Product,Category,DiscountCodes
 from .serializers import ProductSerializer,CategorySerializer,DiscountSerializer
 
-
+#category
 @api_view(['GET'])
 def list_categories(request):
     if request.method == "GET":
@@ -13,7 +13,7 @@ def list_categories(request):
         serializer = CategorySerializer(categories, many=True)
         return Response(serializer.data)
 
-@api_view(['GET', 'POST', 'DELETE'])    
+@api_view(['GET', 'POST', 'PUT','DELETE'])    
 def category_management(request, pk):
     try:
         category = Category.objects.get(pk=pk)
@@ -24,7 +24,7 @@ def category_management(request, pk):
         serializer = CategorySerializer(category)
         return Response(serializer.data)
 
-    elif request.method == 'POST':
+    elif request.method == 'POST' or 'PUT':
         serializer = CategorySerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -35,6 +35,7 @@ def category_management(request, pk):
         category.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+#product search and filtering
 @api_view(['GET'])
 def search_products(request):
     query_params = request.query_params
@@ -59,21 +60,22 @@ def search_products(request):
     serializer = ProductSerializer(products, many=True)
     return Response(serializer.data)
 
-@api_view(['GET', 'POST'])
+#discount
+@api_view(['GET', 'POST', 'PUT'])
 def discount_codes_list(request):
     if request.method == 'GET':
         discount_codes = DiscountCodes.objects.all()
         serializer = DiscountSerializer(discount_codes, many=True)
         return Response(serializer.data)
 
-    elif request.method == 'POST':
+    elif request.method == 'POST' or 'PUT':
         serializer = DiscountSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET', 'PUT', 'DELETE'])
+@api_view(['GET', 'POST', 'PUT', 'DELETE'])
 def discount_codes_detail(request, pk):
     try:
         discount_code = DiscountCodes.objects.get(pk=pk)
@@ -84,7 +86,7 @@ def discount_codes_detail(request, pk):
         serializer = DiscountSerializer(discount_code)
         return Response(serializer.data)
 
-    elif request.method == 'PUT':
+    elif request.method == 'POST' or 'PUT':
         serializer = DiscountSerializer(discount_code, data=request.data)
         if serializer.is_valid():
             serializer.save()

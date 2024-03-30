@@ -1,7 +1,7 @@
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from Costumers.models import Costumer
+from Customers.models import Customer
 from .models import Product, Category, DiscountCodes, Comment
 from .serializers import ProductSerializer, CategorySerializer, DiscountSerializer, CommentSerializer
 
@@ -71,9 +71,9 @@ class DiscountCodesTests(APITestCase):
 
 class CommentTests(APITestCase):
     def setUp(self):
-        self.costumer = Costumer.objects.create(first_name='John', last_name='Doe', username='johndoe', phone_number='1234567890', email='john@example.com', password='testpassword')
+        self.Customer = Customer.objects.create(first_name='John', last_name='Doe', username='johndoe', phone_number='1234567890', email='john@example.com', password='testpassword')
         self.product = Product.objects.create(name='Test Product', brand='Test Brand', quantity=10, price=100, manufator_date='2023-01-01')
-        self.comment = Comment.objects.create(product=self.product, User=self.costumer, Comment='Test comment', rating=5)
+        self.comment = Comment.objects.create(product=self.product, User=self.Customer, Comment='Test comment', rating=5)
 
     def test_comment_list(self):
         url = reverse('comment-list')
@@ -89,7 +89,7 @@ class CommentTests(APITestCase):
 
     def test_create_comment(self):
         url = reverse('comment-list')
-        data = {'product': self.product.pk, 'User': self.costumer.pk, 'Comment': 'New comment', 'rating': 4}
+        data = {'product': self.product.pk, 'User': self.Customer.pk, 'Comment': 'New comment', 'rating': 4}
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Comment.objects.count(), 2)  # Check if a new comment is created

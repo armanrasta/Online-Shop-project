@@ -1,0 +1,4 @@
+docker run --name onlineshopdb-container -e POSTGRES_PASSWORD=13821382. -p 5432:5432 -d postgres
+docker exec -it onlineshopdb-container psql -U postgres
+docker stop my-postgres-container
+docker rm my-postgres-container

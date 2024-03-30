@@ -37,8 +37,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    'django_otp',
+    'django_otp.plugins.otp_totp',
+    'django_otp.plugins.otp_hotp',
+    'django_otp.plugins.otp_static',
+    
     'rest_framework',
-    'Costumers',
+    'Customers',
     'Product', 
     'Orders',
     'core',
@@ -50,9 +56,10 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'costumers.middlewares.DoSMiddleware',
+    # 'Customers.middlewares.DoSMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -75,6 +82,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
+#rest_framework
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+    ],
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -85,13 +98,22 @@ DATABASES = {
     #     'NAME': BASE_DIR / 'db.sqlite3',
     # }
     
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': 'online-shop-project',
+    #     'USER': 'root',
+    #     'PASSWORD': 'ldpbw68UkPKMuqpALxb7PDjN',
+    #     'HOST': 'sinai.liara.cloud',
+    #     'PORT': '31299',
+    # }
+    
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'online-shop-project',
-        'USER': 'root',
-        'PASSWORD': 'ldpbw68UkPKMuqpALxb7PDjN',
-        'HOST': 'sinai.liara.cloud',
-        'PORT': '31299',
+        'NAME': 'onlineshop',
+        'USER': 'postgres',
+        'PASSWORD': '13821382.',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -137,6 +159,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+MEDIA_URL = 'media/'
+MEDIA_ROOT= BASE_DIR / 'media'
 
 STATICFILES_DIRS = [
     BASE_DIR / "static",
