@@ -22,4 +22,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("shop/", include('Product.urls')  ),
     path('send-welcome-email/', send_welcome_email, name='send_welcome_email'),
+    path('api/', include('Customers.urls')),
+    path('api/', include('Product.urls')),
 ]
