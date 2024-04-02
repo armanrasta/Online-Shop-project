@@ -11,6 +11,7 @@ from .models import Customer
 from core.RedisConf import redis_client
 import uuid
 import re
+from django.contrib.auth import authenticate
 
 #sign up
 @api_view(['POST'])
@@ -106,23 +107,36 @@ def login_otp(request):
         email_or_username = request.data.get('username or email')
         password = request.data.get('password')
         
-        #cheking if client entered username or email
+        #checking if the client entered username or email
         pattern = re.compile(r'^[\w\.-]+@[a-zA-Z\d\.-]+\.[a-zA-Z]{2,}$')
         
         if pattern.match(email_or_username):
             email = email_or_username
-            user = Customer.objects.get(email=email)
-            password_chek = user.check_password(password)
+            try:
+                user = Customer.objects.get(email=email)
+            except Customer.DoesNotExist:
+                return Response({'error': 'User with this email does not exist'}, status=status.HTTP_404_NOT_FOUND)
         else:
             username = email_or_username
-            user = Customer.objects.get(username=username)
-            email = user.email
-            password_chek = user.check_password(password)
-            
-        #create user-id
+            try:
+                user = Customer.objects.get(username=username)
+                email = user.email
+            except Customer.DoesNotExist:
+                return Response({'error': 'User with this username does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        
+        #check password
+        if not user.check_password(password):
+            return Response({'error': 'Invalid password'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        #create user ID
         user_id = uuid.uuid4().hex
         
-        #otp making and storing
+        #storing user info
+        user_info = f'{email},{password}'
+        user_info_key = f'user_info:{user_id}'
+        redis_client.setex(user_info_key, 300, user_info)
+        
+        #generate OTP and store it
         otp_code = get_random_string(length=6, allowed_chars='0123456789')
         otp_key = f'otp:{user_id}'
         redis_client.setex(otp_key, 300, otp_code)
@@ -142,46 +156,43 @@ def login(request):
         otp_code = request.data.get('otp')
         user_id = request.data.get('user_id')
         
-        # Verify OTP
+        #verify OTP
         otp_key = f'otp:{user_id}'
         stored_otp = redis_client.get(otp_key)
         if not stored_otp or stored_otp.decode('utf-8') != otp_code:
-            return Response({'error': 'Invalid OTP code'},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Invalid OTP code'}, status=status.HTTP_400_BAD_REQUEST)
         
-        # Get user information
+        #get user information
         user_info_key = f'user_info:{user_id}'
         user_info = redis_client.get(user_info_key)
         if not user_info:
-            return Response({'error': 'User information not found'},
-                            status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'User information not found'}, status=status.HTTP_404_NOT_FOUND)
         
-        # Parse user information
-        email, username, first_name, last_name, password = user_info.decode('utf-8').split(',')
+        #parse user information
+        email, password = user_info.decode('utf-8').split(',')
         
-        # Authenticate user
-        user = authenticate(username=username, password=password)
+        #authenticate user
+        user = authenticate(email=email, password=password)
         if user is None:
-            return Response({'error': 'Invalid credentials'}, 
-                            status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
         
-        # Generate JWT token
+        #generate JWT token
         refresh = RefreshToken.for_user(user)
         data = {
             'refresh': str(refresh),
             'access': str(refresh.access_token),
         }
         
-        # Delete OTP and user information from Redis
+        #delete OTP and user information from Redis
         redis_client.delete(otp_key)
         redis_client.delete(user_info_key)
         
         return Response(data, status=status.HTTP_200_OK)
         
     else:
-        return Response({'error': 'Method not allowed'}, 
-                        status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     
+     
 @api_view(['POST'])
 def forgot_password(request):
     if request.method == 'POST':
