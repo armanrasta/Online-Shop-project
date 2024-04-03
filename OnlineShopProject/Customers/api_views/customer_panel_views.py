@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from ..models import Address
 from ..serializers import AddressSerializer
-
+#dashboard
 @api_view(['GET'])
 @authentication_classes([JWTTokenUserAuthentication])
 @permission_classes([IsAuthenticated])
@@ -22,6 +22,7 @@ def dashboard(request):
         'username': username, 'email': email, 'phone number': phone_number,
         'first name': first_name, 'last name': last_name})
     
+#addresses
 @api_view(['POST', 'GET'])
 @authentication_classes([JWTTokenUserAuthentication])
 @permission_classes([IsAuthenticated])
@@ -41,3 +42,4 @@ def address(request):
             serializer.save(Customer=user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    

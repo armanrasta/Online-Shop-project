@@ -2,10 +2,13 @@ from rest_framework import serializers
 from .models import Cart, CartItem, Customer,Address
 
 class CartItemSerializer(serializers.ModelSerializer):
+    product_name = serializers.ReadOnlyField(source='product.name')
+    product_price = serializers.ReadOnlyField(source='product.price')
+    total_price = serializers.ReadOnlyField()
+
     class Meta:
         model = CartItem
-        fields = "__all__"
-        
+        fields = ['product_name', 'product_price', 'quantity', 'total_price']
 class CartSerializer(serializers.ModelSerializer):
     items = CartItemSerializer(many = True)
     
