@@ -7,11 +7,15 @@ from django.contrib.auth.models import User
 from django.utils.crypto import get_random_string
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
-from .models import Customer
+from ..models import Customer, Cart, CartItem
+from Product.models import Product
 from core.RedisConf import redis_client
+from django.contrib.auth import authenticate
 import uuid
 import re
-from django.contrib.auth import authenticate
+import json
+
+
 
 #sign up
 @api_view(['POST'])
@@ -51,7 +55,7 @@ def signup_otp(request):
         
         subject = 'Sign Up OTP'
         message = f'Your OTP for sign up is: \n {otp_code}'
-        send_mail(subject, message, 'sender@example.com', [email])
+        send_mail(subject, message, 'armanrostamiar@gmail.com', [email])
 
         return Response({'success': 'OTP sent to your email', 'user_id': user_id},
                         status=status.HTTP_200_OK)
@@ -144,7 +148,7 @@ def login_otp(request):
         #sending email
         subject = 'Log-IN OTP'
         message = f'Your OTP for Log-IN is: \n {otp_code}'
-        send_mail(subject, message, 'sender@example.com', [email])
+        send_mail(subject, message, 'armanrostamiar@gmail.com', [email])
         
         return Response({'success': 'OTP sent to your email', 'user_id': user_id}, status=status.HTTP_200_OK)
         
@@ -183,27 +187,80 @@ def login(request):
             'access': str(refresh.access_token),
         }
         
-        #delete OTP and user information from Redis
+        #transfer cart items from cookie to database
+        cart_items_cookie = request.COOKIES.get('cart_items', '[]')
+        cart_items_cookie = json.loads(cart_items_cookie)
+        
+        cart, created = Cart.objects.get_or_create(customer=user)
+        for item in cart_items_cookie:
+            product_id = item.get('product_id')
+            quantity = item.get('quantity', 1)
+            product = Product.objects.get(id=product_id)
+            cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+            cart_item.quantity += quantity
+            cart_item.save()
+        
+        #delete OTP and user information from Redis and cookie
         redis_client.delete(otp_key)
         redis_client.delete(user_info_key)
+        response = Response(data, status=status.HTTP_200_OK)
+        response.delete_cookie('cart_items')
         
-        return Response(data, status=status.HTTP_200_OK)
+        return response
         
     else:
         return Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     
-     
+#password request
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes
+from django.core.exceptions import ObjectDoesNotExist
+
 @api_view(['POST'])
-def forgot_password(request):
-    if request.method == 'POST':
-        email_or_username = request.data.get('username or email')
-        if not email_or_username:
-            return Response({'error': 'Email or Username is required'},
-                            status=status.HTTP_400_BAD_REQUEST)
+def request_password_reset(request):
+    email_or_username = request.data.get('username_or_email')
+    if not email_or_username:
+        return Response({'error': 'Email or Username is required'}, status=status.HTTP_400_BAD_REQUEST)
 
-        otp = request.data.get('otp')
-        if not otp:
-            return Response({'error': 'One Time Password is required'},
-                            status=status.HTTP_400_BAD_REQUEST)
+    # Find user by email or username
+    try:
+        user = User.objects.get(email=email_or_username) if '@' in email_or_username else User.objects.get(username=email_or_username)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    token = default_token_generator.make_token(user)
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+
+    password_reset_url = f'http://example.com/password_reset/{uid}/{token}/'
+
+    subject = 'Password Reset Request'
+    message = f'Please use the link below to reset your password:\n{password_reset_url}'
+    send_mail(subject, message, 'armanrostamiar@gmail.com', [user.email])
+
+    return Response({'success': 'Password reset link sent to your email'}, 
+                    status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def reset_password(request, uidb64, token):
+    new_password = request.data.get('new_password')
+    confirm_password = request.data.get('confirm_password')
+
+    if not new_password or not confirm_password:
+        return Response({'error': 'New password and confirmation are required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if new_password != confirm_password:
+        return Response({'error': 'Passwords do not match'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        user.set_password(new_password)
+        user.save()
+        return Response({'success': 'Password has been reset successfully'}, status=status.HTTP_200_OK)
+    else:
+        return Response({'error': 'Invalid token or UID'}, status=status.HTTP_400_BAD_REQUEST)
