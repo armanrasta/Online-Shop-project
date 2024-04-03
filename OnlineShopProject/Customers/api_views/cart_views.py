@@ -1,11 +1,13 @@
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes,authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
 from ..models import Cart, CartItem, Product
 from ..serializers import CartItemSerializer
 
 @api_view(['POST'])
+@authentication_classes([JWTTokenUserAuthentication])
 @permission_classes([IsAuthenticated])
 def add_to_cart(request):
     user = request.user
@@ -25,6 +27,7 @@ def add_to_cart(request):
         return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
     
 @api_view(['GET'])
+@authentication_classes([JWTTokenUserAuthentication])
 @permission_classes([IsAuthenticated])
 def show_cart(request):
     user = request.user
