@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework import status
+from django.shortcuts import get_object_or_404
 from .models import Product,Category,DiscountCodes,Comment
 from .serializers import ProductSerializer,CategorySerializer,DiscountSerializer,CommentSerializer
 
@@ -58,6 +59,14 @@ def search_products(request):
     if max_price:
         products = products.filter(price__lte=max_price)
 
+    serializer = ProductSerializer(products, many=True)
+    return Response(serializer.data)
+
+#product
+@api_view(['GET'])
+def products_by_category(request, category_name):
+    subcategory = get_object_or_404(Category, name=category_name, is_subcat=True)
+    products = Product.objects.filter(category=subcategory)
     serializer = ProductSerializer(products, many=True)
     return Response(serializer.data)
 

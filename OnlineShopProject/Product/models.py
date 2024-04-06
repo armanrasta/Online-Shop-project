@@ -5,7 +5,7 @@ class Category(BaseModel):
     name = models.CharField(max_length=255)
     is_subcat = models.BooleanField(default=False)
     parent_category = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='subcat', limit_choices_to={'is_subcat': False})
-    pic = models.ImageField(upload_to="Media/cateogry_img")
+    pic = models.ImageField(upload_to="cateogry_img")
     
     def __str__(self):
         return self.name
@@ -28,7 +28,7 @@ class ProductPicture(BaseModel):
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def image_upload_path(self, filename):
-        return f"Media/{self.product.brand}-{self.product.name}/product_img/{filename}"
+        return f"{self.product.brand}-{self.product.name}/product_img/{filename}"
 
     def save(self, *args, **kwargs):
         self.image.upload_to = self.image_upload_path
