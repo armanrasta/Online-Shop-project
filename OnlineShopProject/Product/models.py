@@ -10,6 +10,7 @@ class Category(BaseModel):
     def __str__(self):
         return self.name
     
+#product info
 class Product(BaseModel):
     name = models.CharField(max_length=30)
     brand = models.CharField(max_length=30)
@@ -17,11 +18,23 @@ class Product(BaseModel):
     category = models.ForeignKey(Category, limit_choices_to={'is_subcat': True}, verbose_name="Selected Subcategory", on_delete=models.CASCADE)
     price = models.IntegerField()
     manufator_date = models.DateField()
-    pic = models.ImageField(upload_to="Media/product_img")
-    
+
     def __str__(self):
         return f"{self.brand} - {self.name}"
     
+class ProductPicture(BaseModel):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='pictures')
+    image = models.ImageField(upload_to='product_images')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def image_upload_path(self, filename):
+        return f"Media/{self.product.brand}-{self.product.name}/product_img/{filename}"
+
+    def save(self, *args, **kwargs):
+        self.image.upload_to = self.image_upload_path
+        super().save(*args, **kwargs)
+    
+#discount
 class DiscountCodes(BaseModel):   
     code = models.TextField(max_length=16, unique=True)
     discount_type = models.CharField(max_length=10, choices=[('P', 'Percent'), ('F', 'Fixed')], null=True, blank=True)
@@ -30,7 +43,8 @@ class DiscountCodes(BaseModel):
     
     def __str__(self):
         return self.code
-    
+
+#comment
 class Comment(BaseModel): 
       
     rating_choices = (

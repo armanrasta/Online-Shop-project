@@ -7,12 +7,20 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class CategorySerializer(serializers.ModelSerializer):
-    products = ProductSerializer(many=True, read_only=True)
+    subcats = serializers.SerializerMethodField()
 
     class Meta:
         model = Category
-        fields = '__all__'
-        
+        fields = ['name', 'subcats']
+
+    def get_subcats(self, obj):
+        if obj.is_subcat:
+            return None
+        else:
+            child_categories = Category.objects.filter(parent_category=obj)
+            serializer = CategorySerializer(child_categories, many=True)
+            return serializer.data
+
 class DiscountSerializer(serializers.ModelSerializer):
     
     class Meta:

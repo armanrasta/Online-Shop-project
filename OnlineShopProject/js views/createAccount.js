@@ -1,5 +1,5 @@
 const userId = 'the_user_id_received_from_send_otp';
-const otpCode = sessionStorage.getItem('user_id');
+const otpCode = sessionStorage.getItem('user_id') ;
 
 const url = 'http://yourdomain.com/create_account';
 

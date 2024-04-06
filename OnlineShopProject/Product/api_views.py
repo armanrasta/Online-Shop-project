@@ -10,10 +10,9 @@ from .serializers import ProductSerializer,CategorySerializer,DiscountSerializer
 #category
 @api_view(['GET'])
 def list_categories(request):
-    if request.method == "GET":
-        categories = Category.objects.prefetch_related('subcat').all()
-        serializer = CategorySerializer(categories, many=True)
-        return Response(serializer.data)
+    parent_categories = Category.objects.filter(parent_category__isnull=True)
+    serializer = CategorySerializer(parent_categories, many=True)
+    return Response(serializer.data)
 
 @api_view(['GET', 'POST', 'PUT','DELETE'])    
 def category_management(request, pk):

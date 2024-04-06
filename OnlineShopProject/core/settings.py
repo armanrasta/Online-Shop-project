@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django_otp.plugins.otp_static',
     
     'rest_framework',
+    'rest_framework_simplejwt',
     'Customers',
     'Product', 
     'Orders',
@@ -85,7 +86,12 @@ WSGI_APPLICATION = 'core.wsgi.application'
 #rest_framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
+        #'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        #'rest_framework.permissions.IsAuthenticated',
+        # 'rest_framework.permissions.IsAdminUser',
     ],
 }
 
@@ -109,11 +115,11 @@ DATABASES = {
     
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'onlineshop',
-        'USER': 'postgres',
-        'PASSWORD': '13821382.',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': 'online-shop',
+        'USER': 'root',
+        'PASSWORD': 'bOoH2XHWh4xIvFjjrxO3HWQR',
+        'HOST': 'chogolisa.liara.cloud',
+        'PORT': '33393',
     }
 }
 
