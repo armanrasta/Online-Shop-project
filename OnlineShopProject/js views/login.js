@@ -44,11 +44,9 @@ function login() {
         .then(response => response.json())
         .then(data => {
             if (data.access) {
-                // Store the JWT in localStorage
                 localStorage.setItem('jwt', data.access);
                 alert('Welcome to Online Shop :)');
             } else {
-                // Handle any errors, such as invalid OTP
                 console.error('Error:', data.error);
                 alert(data.error);
             }

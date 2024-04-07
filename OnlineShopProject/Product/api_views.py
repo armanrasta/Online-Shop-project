@@ -7,6 +7,7 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from .models import Product,Category,DiscountCodes,Comment
 from .serializers import ProductSerializer,CategorySerializer,DiscountSerializer,CommentSerializer
+from Customers.serializers import CartSerializer
 
 #category
 @api_view(['GET'])
@@ -112,8 +113,6 @@ def discount_codes_detail(request, pk):
         discount_code.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
-
-from Customers.serializers import CartSerializer
 
 class ApplyDiscount(APIView):
     def post(self, request, *args, **kwargs):

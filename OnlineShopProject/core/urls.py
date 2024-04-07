@@ -20,8 +20,9 @@ from .views import send_welcome_email
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("shop/", include('Product.urls')  ),
+    # path("shop/", include('Product.urls')  ),
     path('send-welcome-email/', send_welcome_email, name='send_welcome_email'),
-    path('api/', include('Customers.urls')),
-    path('api/', include('Product.urls')),
+    path('api/', include('Customers.api_urls')),
+    path('api/', include('Product.api_urls')),
+    # path('api/', include('Orders.api_urls')),
 ]

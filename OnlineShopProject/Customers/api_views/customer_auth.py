@@ -24,6 +24,7 @@ def signup_otp(request):
         username = request.data.get('username')
         first_name = request.data.get('first_name')
         last_name = request.data.get('last_name')
+        phone_number = request.data.get('phone_number')
         email = request.data.get('email')
         password = request.data.get('password')
         
@@ -46,7 +47,7 @@ def signup_otp(request):
         user_id = uuid.uuid4().hex
 
         user_info_key = f'user_info:{user_id}'
-        user_info = f'{email},{username},{first_name},{last_name},{password}'
+        user_info = f'{email},{username},{phone_number},{first_name},{last_name},{password}'
         redis_client.setex(user_info_key, 300, user_info)
 
         otp_code = get_random_string(length=6, allowed_chars='0123456789')
@@ -55,7 +56,7 @@ def signup_otp(request):
         
         subject = 'Sign Up OTP'
         message = f'Your OTP for sign up is: \n {otp_code}'
-        send_mail(subject, message, 'armanrostamiar@gmail.com', [email])
+        send_mail(subject, message, 'armanrostami1000@gmail.com', [email])
 
         return Response({'success': 'OTP sent to your email', 'user_id': user_id},
                         status=status.HTTP_200_OK)
@@ -84,12 +85,13 @@ def create_account(request):
             return Response({'error': 'User information not found'},
                             status=status.HTTP_404_NOT_FOUND)
 
-        email, username, first_name, last_name, password = user_info.split(',')
+        email, username,phone_number, first_name, last_name, password = user_info.split(',')
         #create user
         Customer.objects.create_user(
             username=username,
             first_name=first_name,
             last_name=last_name,
+            phone_number = phone_number,
             email=email,
             password=password
         )
@@ -119,18 +121,21 @@ def login_otp(request):
             try:
                 user = Customer.objects.get(email=email)
             except Customer.DoesNotExist:
-                return Response({'error': 'User with this email does not exist'}, status=status.HTTP_404_NOT_FOUND)
+                return Response({'error': 'User with this email does not exist'}, 
+                                status=status.HTTP_404_NOT_FOUND)
         else:
             username = email_or_username
             try:
                 user = Customer.objects.get(username=username)
                 email = user.email
             except Customer.DoesNotExist:
-                return Response({'error': 'User with this username does not exist'}, status=status.HTTP_404_NOT_FOUND)
+                return Response({'error': 'User with this username does not exist'}, 
+                                status=status.HTTP_404_NOT_FOUND)
         
         #check password
         if not user.check_password(password):
-            return Response({'error': 'Invalid password'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Invalid password'},
+                            status=status.HTTP_400_BAD_REQUEST)
         
         #create user ID
         user_id = uuid.uuid4().hex
@@ -151,9 +156,11 @@ def login_otp(request):
         send_mail(subject, message, 'armanrostami1000@gmail.com', [email])
         
         
-        return Response({'success': 'OTP sent to your email', 'user_id': user_id}, status=status.HTTP_200_OK)
+        return Response({'success': 'OTP sent to your email', 'user_id': user_id},
+                        status=status.HTTP_200_OK)
         
-    return Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    return Response({'error': 'Method not allowed'}, 
+                    status=status.HTTP_405_METHOD_NOT_ALLOWED)
         
 @api_view(['POST'])
 def login(request):
@@ -165,13 +172,15 @@ def login(request):
         otp_key = f'otp:{user_id}'
         stored_otp = redis_client.get(otp_key)
         if not stored_otp or stored_otp.decode('utf-8') != otp_code:
-            return Response({'error': 'Invalid OTP code'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Invalid OTP code'},
+                            status=status.HTTP_400_BAD_REQUEST)
         
         #get user information
         user_info_key = f'user_info:{user_id}'
         user_info = redis_client.get(user_info_key)
         if not user_info:
-            return Response({'error': 'User information not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'User information not found'},
+                            status=status.HTTP_404_NOT_FOUND)
         
         #parse user information
         email, password = user_info.decode('utf-8').split(',')
@@ -179,7 +188,8 @@ def login(request):
         #authenticate user
         user = authenticate(email=email, password=password)
         if user is None:
-            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'error': 'Invalid credentials'},
+                            status=status.HTTP_401_UNAUTHORIZED)
         
         #generate JWT token
         refresh = RefreshToken.for_user(user)
@@ -210,7 +220,8 @@ def login(request):
         return response
         
     else:
-        return Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response({'error': 'Method not allowed'}, 
+                        status=status.HTTP_405_METHOD_NOT_ALLOWED)
     
 #password request
 from django.contrib.auth.tokens import default_token_generator
@@ -237,7 +248,7 @@ def request_password_reset(request):
 
     subject = 'Password Reset Request'
     message = f'Please use the link below to reset your password:\n{password_reset_url}'
-    send_mail(subject, message, 'armanrostamiar@gmail.com', [user.email])
+    send_mail(subject, message, 'armanrostami1000@gmail.com', [user.email])
 
     return Response({'success': 'Password reset link sent to your email'}, 
                     status=status.HTTP_200_OK)

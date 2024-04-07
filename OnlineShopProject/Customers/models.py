@@ -7,8 +7,6 @@ from django.db.models import Sum, F
 
 class Customer(AbstractUser):
     phone_number = PhoneNumberField(unique=True)
-    otp_code = models.CharField(max_length=6, null=True, blank=True, validators=[
-                                MinLengthValidator(6)])
 
     groups = models.ManyToManyField(
         'auth.Group',
