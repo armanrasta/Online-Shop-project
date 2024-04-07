@@ -65,8 +65,13 @@ def search_products(request):
 #product
 @api_view(['GET'])
 def products_by_category(request, category_name):
-    subcategory = get_object_or_404(Category, name=category_name, is_subcat=True)
-    products = Product.objects.filter(category=subcategory)
+    category = get_object_or_404(Category, name=category_name, is_subcat=True)
+    products = Product.objects.filter(category=category)
+    paginator = PageNumberPagination()
+    page = paginator.paginate_queryset(products, request)
+    if page is not None:
+        serializer = ProductSerializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
     serializer = ProductSerializer(products, many=True)
     return Response(serializer.data)
 
@@ -106,6 +111,31 @@ def discount_codes_detail(request, pk):
     elif request.method == 'DELETE':
         discount_code.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+
+from Customers.serializers import CartSerializer
+
+class ApplyDiscount(APIView):
+    def post(self, request, *args, **kwargs):
+        cart_serializer = CartSerializer(data=request.data)
+        if cart_serializer.is_valid():
+            cart = cart_serializer.validated_data
+            discount_code = cart.get('discount_code')
+            try:
+                discount = DiscountCodes.objects.get(code=discount_code, availablity=True)
+            except DiscountCodes.DoesNotExist:
+                return Response({'error': 'Invalid or unavailable discount code'}, status=400)
+            
+            total_price = cart.get('total_price')
+            if discount.discount_type == 'P':
+                discount_amount = (total_price * discount.discount) / 100
+                total_price -= discount_amount
+            elif discount.discount_type == 'F':
+                total_price -= discount.discount
+            
+            return Response({'total_price': total_price})
+        return Response(cart_serializer.errors, status=400)
+
     
 class ProductList(generics.ListAPIView):
     queryset = Product.objects.all()

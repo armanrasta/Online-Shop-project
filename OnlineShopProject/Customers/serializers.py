@@ -1,28 +1,36 @@
 from rest_framework import serializers
 from .models import Cart, CartItem, Customer,Address
 
+
 class CartItemSerializer(serializers.ModelSerializer):
     product_name = serializers.ReadOnlyField(source='product.name')
     product_price = serializers.ReadOnlyField(source='product.price')
-    total_price = serializers.ReadOnlyField()
+    total_price = serializers.SerializerMethodField()
 
     class Meta:
         model = CartItem
         fields = ['product_name', 'product_price', 'quantity', 'total_price']
-        
+
+    def get_total_price(self, obj):
+        return obj.quantity * obj.product.price
+
 class CartSerializer(serializers.ModelSerializer):
-    items = CartItemSerializer(many = True)
-    
+    items = CartItemSerializer(many=True)
+    total_price = serializers.SerializerMethodField()
+
     class Meta:
         model = Cart
-        fields = ['id', 'items']
-        
-class CustomerCartSerializer(serializers.ModelSerializer):
+        fields = ['id', 'total_price', 'items']
+
+    def get_total_price(self, obj):
+        return sum(item.get_total_price() for item in obj.items.all())
+
+class CustomerCartSerializer(serializers.ModelSerializer): #un necesarry
     cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Customer
-        fields = []
+        fields = ['cart']
 
     def get_cart(self, obj):
         try:
@@ -30,8 +38,7 @@ class CustomerCartSerializer(serializers.ModelSerializer):
             serializer = CartSerializer(cart)
             return serializer.data
         except Cart.DoesNotExist:
-            return None
-        
+            return None    
 
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:

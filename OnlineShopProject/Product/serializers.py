@@ -4,7 +4,7 @@ from .models import Product, Category, DiscountCodes, Comment
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = '__all__'
+        fields = ['name', 'brand', 'price', 'category', 'manufator_date']
 
 class CategorySerializer(serializers.ModelSerializer):
     subcats = serializers.SerializerMethodField()

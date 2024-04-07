@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
 from ..models import Cart, CartItem, Product
-from ..serializers import CartItemSerializer
+from ..serializers import CartItemSerializer, CartSerializer
 
 @api_view(['POST'])
 @authentication_classes([JWTTokenUserAuthentication])
@@ -33,12 +33,11 @@ def show_cart(request):
     user = request.user
     try:
         cart = Cart.objects.get(customer=user)
-        cart_items = CartItem.objects.filter(cart=cart)
-        serializer = CartItemSerializer(cart_items, many=True)
+        serializer = CartSerializer(cart)
         return Response(serializer.data, status=status.HTTP_200_OK)
     except Cart.DoesNotExist:
         return Response({'error': 'Cart not found'}, status=status.HTTP_404_NOT_FOUND)
-
+    
 @api_view(['POST'])
 @authentication_classes([JWTTokenUserAuthentication])
 @permission_classes([IsAuthenticated])

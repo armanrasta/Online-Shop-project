@@ -3,7 +3,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinLengthValidator
 from Product.models import Product
-
+from django.db.models import Sum, F
 
 class Customer(AbstractUser):
     phone_number = PhoneNumberField(unique=True)
@@ -53,6 +53,12 @@ class Cart(models.Model):
     customer = models.OneToOneField(Customer, on_delete=models.CASCADE)
     items = models.ManyToManyField(Product, through='CartItem')
 
+    @property
+    def total_price(self):
+        return self.cartitem_set.aggregate(
+            total=Sum(F('quantity') * F('product__price'))
+        )['total'] or 0
+        
     def __str__(self):
         return f"Cart of {self.customer.username}"
 
