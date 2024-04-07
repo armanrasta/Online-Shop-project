@@ -8,6 +8,7 @@ from django.db import transaction
 from django.db.models import ObjectDoesNotExist
 from ..models import Cart, CartItem, Product
 from ..serializers import CartItemSerializer, CartSerializer
+from Customers.permissions import IsCustomer
 import logging
 
 logger = logging.getLogger(__name__)
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 #shop
 @api_view(['POST'])
 @authentication_classes([JWTTokenUserAuthentication])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsCustomer])
 def add_to_cart(request): #3.2
     user = request.user
     product_id = request.data.get('product_id')
@@ -49,9 +50,10 @@ def add_to_cart(request): #3.2
             {'error': 'Error adding item to cart'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 #cart
-@authentication_classes([JWTTokenUserAuthentication])
-@permission_classes([IsAuthenticated])
 class CartView(APIView):
+    authentication_classes = [JWTTokenUserAuthentication]
+    permission_classes = [IsAuthenticated, IsCustomer]
+
     def get_cart(self, user):
         try:
             return Cart.objects.select_related('customer').get(customer=user)
