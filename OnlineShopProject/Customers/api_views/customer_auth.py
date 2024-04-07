@@ -147,8 +147,9 @@ def login_otp(request):
         
         #sending email
         subject = 'Log-IN OTP'
-        message = f'Your OTP for Log-IN is: \n {otp_code}'
-        send_mail(subject, message, 'armanrostamiar@gmail.com', [email])
+        message = f'Your OTP for Log-IN is: \n {otp_code}\n***Expires in 5 minutes***'
+        send_mail(subject, message, 'armanrostami1000@gmail.com', [email])
+        
         
         return Response({'success': 'OTP sent to your email', 'user_id': user_id}, status=status.HTTP_200_OK)
         
