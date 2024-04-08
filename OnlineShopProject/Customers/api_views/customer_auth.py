@@ -80,12 +80,12 @@ def create_account(request):
             
         #redis user info parsing
         user_info_key = f'user_info:{user_id}'
-        user_info = redis_client.get(user_info_key)
-        if not user_info:
+        user_info_bytes = redis_client.get(user_info_key)
+        if not user_info_bytes:
             return Response({'error': 'User information not found'},
                             status=status.HTTP_404_NOT_FOUND)
-
-        email, username,phone_number, first_name, last_name, password = user_info.split(',')
+        user_info = user_info_bytes.decode('utf-8')
+        email, username, phone_number, first_name, last_name, password = user_info.split(',')
         #create user
         Customer.objects.create_user(
             username=username,
@@ -110,7 +110,7 @@ def create_account(request):
 def login_otp(request):
     
     if request.method == 'POST':
-        email_or_username = request.data.get('username or email')
+        email_or_username = request.data.get('username-or-email')
         password = request.data.get('password')
         
         #checking if the client entered username or email
@@ -184,9 +184,12 @@ def login(request):
         
         #parse user information
         email, password = user_info.decode('utf-8').split(',')
+        print("Email:", email.strip())
+        print("Password:", password.strip())
         
         #authenticate user
-        user = authenticate(email=email, password=password)
+        user = authenticate(request, email=email, password=password)
+        print(user)
         if user is None:
             return Response({'error': 'Invalid credentials'},
                             status=status.HTTP_401_UNAUTHORIZED)
@@ -199,7 +202,7 @@ def login(request):
         }
         
         #transfer cart items from cookie to database
-        cart_items_cookie = request.COOKIES.get('cart_items', '[]')
+        cart_items_cookie = request.COOKIES.get('cookie_cart', '[]')
         cart_items_cookie = json.loads(cart_items_cookie)
         
         cart, created = Cart.objects.get_or_create(customer=user)
@@ -218,7 +221,6 @@ def login(request):
         response.delete_cookie('cart_items')
         
         return response
-        
     else:
         return Response({'error': 'Method not allowed'}, 
                         status=status.HTTP_405_METHOD_NOT_ALLOWED)

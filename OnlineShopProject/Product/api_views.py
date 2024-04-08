@@ -115,7 +115,7 @@ def discount_codes_detail(request, pk):
     
 
 class ApplyDiscount(APIView):
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         cart_serializer = CartSerializer(data=request.data)
         if cart_serializer.is_valid():
             cart = cart_serializer.validated_data
