@@ -46,6 +46,7 @@ class OrderItem(BaseModel):
     
     def get_cost(self):
         return self.item.price * self.quantity
+    
 class Transaction(BaseModel):
     SUCCESSFUL = 'S'
     NOT_SUCCESSFUL = 'NS'
@@ -54,7 +55,6 @@ class Transaction(BaseModel):
         (SUCCESSFUL, 'Successful'),
         (NOT_SUCCESSFUL, 'Not Successful'),
     ]
-
     payment_method_choices = (
         ('CA', 'Cash'),
         ('CR', 'Credit'),
@@ -69,11 +69,10 @@ class Transaction(BaseModel):
     amount = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0.01)])
     currency = models.CharField(max_length=3, choices=currency_choices, default='R')
     status = models.CharField(max_length=2, choices=STATUS_CHOICES)
-    payment_method = models.CharField(max_length=2, choices=payment_method_choices)
+    payment_method = models.CharField(max_length=2, choices=payment_method_choices, default='CR')
     transaction_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     order = models.ForeignKey(Order, on_delete=models.DO_NOTHING)
     customer = models.ForeignKey(Customer, on_delete=models.DO_NOTHING)
-    timestamp = models.DateTimeField(auto_now_add=True)
     description = models.TextField()
     refund_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     refund_reason = models.TextField(null=True, blank=True)

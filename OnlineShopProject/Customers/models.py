@@ -48,7 +48,7 @@ class Address(models.Model):
 
 class Cart(models.Model):
 
-    customer = models.OneToOneField(Customer, on_delete=models.CASCADE)
+    customer = models.OneToOneField(Customer, on_delete=models.CASCADE, db_index=True)
     items = models.ManyToManyField(Product, through='CartItem')
 
     @property
@@ -66,13 +66,13 @@ class CartItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
 
+    @property
     def total_price(self):
-        total = self.product.price * self.quantity
-        return total
+        return self.product.price * self.quantity
 
     class Meta:
         verbose_name = 'CartItem'
         verbose_name_plural = 'CartItems'
 
     def __str__(self):
-        return f"{self.quantity}x {self.product.name} in {self.cart.customer.username}`s Cart"
+        return f"{self.quantity} x {self.product.name} in {self.cart.customer.username}`s Cart"

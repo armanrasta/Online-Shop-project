@@ -33,3 +33,7 @@ class CustomUserPermissions:
         
 class Colors(BaseModel):
     color = models.CharField(max_length=50)
+    hex = models.CharField(max_length=7)
+    
+    def __str__(self):
+        return self.color
