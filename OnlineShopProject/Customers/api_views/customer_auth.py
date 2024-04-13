@@ -1,16 +1,17 @@
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.permissions import AllowAny
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.mail import send_mail
 from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model, authenticate
 from django.utils.crypto import get_random_string
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from ..models import Customer, Cart, CartItem
 from Product.models import Product
 from core.RedisConf import redis_client
-from django.contrib.auth import authenticate
 import uuid
 import re
 import json
@@ -107,6 +108,7 @@ def create_account(request):
 
 #login
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def login_otp(request):
     
     if request.method == 'POST':
@@ -155,7 +157,6 @@ def login_otp(request):
         message = f'Your OTP for Log-IN is: \n {otp_code}\n***Expires in 5 minutes***'
         send_mail(subject, message, 'armanrostami1000@gmail.com', [email])
         
-        
         return Response({'success': 'OTP sent to your email', 'user_id': user_id},
                         status=status.HTTP_200_OK)
         
@@ -163,68 +164,65 @@ def login_otp(request):
                     status=status.HTTP_405_METHOD_NOT_ALLOWED)
         
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def login(request):
     if request.method == 'POST':
         otp_code = request.data.get('otp')
-        user_id = request.data.get('user_id')
+        userid = request.data.get('user-id')
         
         #verify OTP
-        otp_key = f'otp:{user_id}'
-        stored_otp = redis_client.get(otp_key)
+        otp_key = rf'otp:{userid}'
+        stored_otp = redis_client.getex(otp_key)
+    
         if not stored_otp or stored_otp.decode('utf-8') != otp_code:
             return Response({'error': 'Invalid OTP code'},
                             status=status.HTTP_400_BAD_REQUEST)
         
-        #get user information
-        user_info_key = f'user_info:{user_id}'
-        user_info = redis_client.get(user_info_key)
-        if not user_info:
-            return Response({'error': 'User information not found'},
-                            status=status.HTTP_404_NOT_FOUND)
-        
-        #parse user information
-        email, password = user_info.decode('utf-8').split(',')
-        print("Email:", email.strip())
-        print("Password:", password.strip())
+        email, password = redis_client.getex(f'user_info:{userid}').decode('utf-8').split(',')
         
         #authenticate user
-        user = authenticate(request, email=email, password=password)
-        print(user)
-        if user is None:
-            return Response({'error': 'Invalid credentials'},
+        UserModel = get_user_model()
+        try:
+            user = UserModel.objects.get(email=email)
+        except UserModel.DoesNotExist:
+            return Response({'error': 'Invalid username/email'},
+                            status=status.HTTP_400_BAD_REQUEST)
+    
+        #check password
+        if user.check_password(password):
+            #generate JWT token
+            refresh = RefreshToken.for_user(user)
+            data = {
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            }
+            
+            #transfer cart items from cookie to database
+            cart_items_cookie = request.COOKIES.get('cookie_cart', '[]')
+            cart_items_cookie = json.loads(cart_items_cookie)
+            
+            cart, created = Cart.objects.get_or_create(customer=user)
+            for item in cart_items_cookie:
+                product_id = item.get('product_id')
+                quantity = item.get('quantity', 1)
+                product = Product.objects.get(id=product_id)
+                cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+                cart_item.quantity += quantity
+                cart_item.save()
+            
+            #delete OTP from Redis and cookie
+            redis_client.delete(otp_key)
+            response = Response(data, status=status.HTTP_200_OK)
+            response.delete_cookie('cart_items')
+            
+            return response
+        else:
+            return Response({'error': 'Invalid password'},
                             status=status.HTTP_401_UNAUTHORIZED)
-        
-        #generate JWT token
-        refresh = RefreshToken.for_user(user)
-        data = {
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        }
-        
-        #transfer cart items from cookie to database
-        cart_items_cookie = request.COOKIES.get('cookie_cart', '[]')
-        cart_items_cookie = json.loads(cart_items_cookie)
-        
-        cart, created = Cart.objects.get_or_create(customer=user)
-        for item in cart_items_cookie:
-            product_id = item.get('product_id')
-            quantity = item.get('quantity', 1)
-            product = Product.objects.get(id=product_id)
-            cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
-            cart_item.quantity += quantity
-            cart_item.save()
-        
-        #delete OTP and user information from Redis and cookie
-        redis_client.delete(otp_key)
-        redis_client.delete(user_info_key)
-        response = Response(data, status=status.HTTP_200_OK)
-        response.delete_cookie('cart_items')
-        
-        return response
     else:
         return Response({'error': 'Method not allowed'}, 
                         status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    
+            
 #password request
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode

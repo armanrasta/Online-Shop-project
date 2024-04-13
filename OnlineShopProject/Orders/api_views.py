@@ -3,12 +3,13 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
 from rest_framework.permissions import IsAuthenticated
+from Customers.permissions import IsCustomer
 from .models import Order, OrderItem, Product, Transaction
 from Customers.models import Cart
 
 @api_view(['POST'])
 @authentication_classes([JWTTokenUserAuthentication])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsCustomer])
 def cart_to_order(request):
     with transaction.atomic():
         user = request.user

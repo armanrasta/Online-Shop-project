@@ -24,5 +24,5 @@ urlpatterns = [
     path('send-welcome-email/', send_welcome_email, name='send_welcome_email'),
     path('api/', include('Customers.api_urls')),
     path('api/', include('Product.api_urls')),
-    # path('api/', include('Orders.api_urls')),
+    path('order/', include('Orders.urls')),
 ]

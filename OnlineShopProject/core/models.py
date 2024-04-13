@@ -30,3 +30,6 @@ class CustomUserPermissions:
             ("edit_or_add_product", "Can edit or add products"),
         )
         
+        
+class Colors(BaseModel):
+    color = models.CharField(max_length=50)

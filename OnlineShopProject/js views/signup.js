@@ -37,7 +37,7 @@ document.getElementById('signUpButton').addEventListener('click', signUpOTP);
 
 function createAccount() {
     let otp = document.getElementById('otp').value;
-    let userId = sessionStorage.getItem('user_id');
+    let userId = sessionStorage.getItem('user-id');
     
     fetch('/api/create_account/', {
         method: 'POST',

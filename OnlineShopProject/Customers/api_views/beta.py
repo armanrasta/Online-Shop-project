@@ -15,7 +15,15 @@ import json
 import logging
 
 logger = logging.getLogger(__name__)
+#cookie cart
+def get_cookie_cart(request):
+    cookie_cart = request.COOKIES.get('cookie_cart', '[]')
+    return json.loads(cookie_cart)
 
+def set_cookie_cart(response, cookie_cart):
+    response.set_cookie('cookie_cart', json.dumps(cookie_cart), max_age=86400)
+    
+#show cart and edit the current cart items
 class CartView(APIView):
 
     def get_cart(self, user):
@@ -36,7 +44,6 @@ class CartView(APIView):
         else:
             cookie_cart = request.COOKIES.get('cookie_cart', '[]')
             return Response(json.loads(cookie_cart), status=status.HTTP_200_OK)
-    
     
     @transaction.atomic
     def post(self, request): #edit cart 3.2
@@ -72,6 +79,10 @@ class CartView(APIView):
             product_id = request.data.get('product_id')
             new_quantity = int(request.data.get('new_quantity', 1))
             remove_entire_item = request.data.get('remove_entire_item', 'false').lower() == 'true'
+            price = request.data.get('price', '')
+            brand = request.data.get('brand', '')
+            manufacture_date = request.data.get('manufacture_date', '')
+            name = request.data.get('name', '')
 
             if not product_id:
                 return JsonResponse({'error': 'Product ID is missing'}, status=400)
@@ -83,88 +94,23 @@ class CartView(APIView):
                     cookie_cart = [item for item in cookie_cart if item['product_id'] != product_id]
                 else:
                     product_in_cart['quantity'] = new_quantity
+                    product_in_cart['brand'] = brand
+                    product_in_cart['manufacture_date'] = manufacture_date
+                    product_in_cart['name'] = name
             else:
-                cookie_cart.append({'product_id': product_id, 'quantity': new_quantity})
-                
+                cookie_cart.append({
+                    'product_id': product_id,
+                    'name': name,
+                    'quantity': new_quantity,
+                    'price': price,
+                    'brand': brand,
+                    'manufacture_date': manufacture_date
+                })
             response = JsonResponse({'success': 'Cart updated'})
             response.set_cookie('cookie_cart', json.dumps(cookie_cart), max_age=86400)
             return response
         
-     
-# class CartView(View):
-#     def get_cookie_cart(self, request):
-#         cookie_cart = request.COOKIES.get('cookie_cart', '[]')
-#         return json.loads(cookie_cart)
-
-#     def set_cookie_cart(self, response, cookie_cart):
-#         response.set_cookie('cookie_cart', json.dumps(cookie_cart), max_age=86400)
-
-#     @method_decorator(csrf_exempt)
-#     def dispatch(self, *args, **kwargs):
-#         return super(CartView, self).dispatch(*args, **kwargs)
-
-#     def post(self, request):
-#         if request.user.is_authenticated:
-#             # Authenticated user logic
-#             user = request.user
-#             product_id = request.data.get('product_id')
-#             quantity = request.data.get('quantity', 1)
-
-#             if not isinstance(quantity, int) or quantity < 1:
-#                 return Response(
-#                     {'error': 'Quantity must be a positive integer'}, status=status.HTTP_400_BAD_REQUEST)
-
-#             try:
-#                 with transaction.atomic():
-#                     product = Product.objects.get(id=product_id)
-#                     cart, _ = Cart.objects.get_or_create(customer=user)
-#                     cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
-
-#                     if not created:
-#                         cart_item.quantity += quantity
-#                     cart_item.save()
-
-#                     cart.refresh_from_db()
-#                     serializer = CartSerializer(cart)
-#                     return Response(
-#                         {'success': 'Item added to cart', 'cart': serializer.data}, status=status.HTTP_201_CREATED)
-#             except Product.DoesNotExist:
-#                 return Response(
-#                     {'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
-#             except Exception as e:
-#                 return Response(
-#                     {'error': 'Error adding item to cart'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-#         else:
-#             # Unauthenticated user logic
-#             cookie_cart = self.get_cookie_cart(request)
-#             product_id = request.data.get('product_id')
-#             quantity = int(request.data.get('quantity', 1))
-
-#             if not product_id:
-#                 return JsonResponse({'error': 'Product ID is missing'}, status=400)
-
-#             product_exists = any(item['product_id'] == product_id for item in cookie_cart)
-
-#             if product_exists:
-#                 for item in cookie_cart:
-#                     if item['product_id'] == product_id:
-#                         item['quantity'] += quantity
-#                         break
-#             else:
-#                 cookie_cart.append({'product_id': product_id, 'quantity': quantity})
-
-#             response = JsonResponse({'success': 'Item added to cookie cart'})
-#             self.set_cookie_cart(response, cookie_cart)
-#             return response
-        
-           
 #add products
-def get_cookie_cart(request):
-    cookie_cart = request.COOKIES.get('cookie_cart', '[]')
-    return json.loads(cookie_cart)
-
-def set_cookie_cart(response, cookie_cart):
-    response.set_cookie('cookie_cart', json.dumps(cookie_cart), max_age=86400)
 
 @api_view(['POST'])
 def add_to_cart(request):

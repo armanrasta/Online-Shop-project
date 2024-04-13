@@ -13,7 +13,7 @@ document.getElementById('product-search-form').addEventListener('submit', functi
         max_price: maxPrice
     }).toString();
   
-    fetch('http://yourdomain.com/api/search-products?' + queryParams, {
+    fetch('api/search-products?' + queryParams, {
         method: 'POST',
         // Additional options like headers, body, etc.
     })

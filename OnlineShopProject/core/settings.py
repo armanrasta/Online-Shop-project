@@ -188,3 +188,13 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'armanrostami1000@gmail.com'
 EMAIL_HOST_PASSWORD = 'cnoygjdvspntplxo'
+
+#auth 
+AUTH_USER_MODEL = 'Customers.Customer'
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'Customers.api_views.CustomerAuthBackEnd.CustomerBackend']
+
+
+#ZARINAPL
+merchant_id = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'

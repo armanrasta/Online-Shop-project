@@ -113,9 +113,10 @@ def discount_codes_detail(request, pk):
         discount_code.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
-
+####
 class ApplyDiscount(APIView):
     def post(self, request):
+        
         cart_serializer = CartSerializer(data=request.data)
         if cart_serializer.is_valid():
             cart = cart_serializer.validated_data
@@ -152,7 +153,7 @@ class ProductCreateAPIView(APIView):  #for admin panel
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+#demo
 class CommentListCreateAPIView(generics.ListCreateAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer

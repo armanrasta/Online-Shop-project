@@ -1,7 +1,7 @@
 async function addToCart(productId, quantity) {
-    const url = 'http://localhost:8000/add_to_cart/';
+    const url = 'api/add-to-cart/';
 
-    const jwtToken = sessionStorage.getItem('jwt_token');
+    const accessToken = localStorage.getItem('accessToken');
 
     if (!jwtToken) {
         console.error('JWT token not found in session storage');
@@ -12,7 +12,7 @@ async function addToCart(productId, quantity) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${jwtToken}`
+            'Authorization': `Bearer ${accessToken}`
         },
         body: JSON.stringify({
             product_id: productId,
