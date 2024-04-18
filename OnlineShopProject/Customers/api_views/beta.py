@@ -109,9 +109,8 @@ class CartView(APIView):
             response = JsonResponse({'success': 'Cart updated'})
             response.set_cookie('cookie_cart', json.dumps(cookie_cart), max_age=86400)
             return response
-        
-#add products
 
+#add products
 @api_view(['POST'])
 def add_to_cart(request):
     authenticated = request.user.is_authenticated

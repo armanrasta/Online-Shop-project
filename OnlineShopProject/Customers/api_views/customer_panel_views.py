@@ -2,9 +2,11 @@ from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import authentication_classes, permission_classes, api_view
 from rest_framework.response import Response
+from rest_framework.generics import RetrieveUpdateDestroyAPIView,RetrieveUpdateAPIView, ListCreateAPIView
 from rest_framework import status
-from ..models import Address
-from ..serializers import AddressSerializer
+from ..permissions import IsCustomer
+from ..models import Address, Customer
+from ..serializers import AddressSerializer, CustomerSerializer
 
 #dashboard
 @api_view(['GET'])
@@ -22,25 +24,30 @@ def dashboard(request):
     return Response({
         'username': username, 'email': email, 'phone number': phone_number,
         'first name': first_name, 'last name': last_name})
-    
+
+class DashboardView(RetrieveUpdateAPIView):
+    authentication_classes = [JWTTokenUserAuthentication]
+    permission_classes = [IsCustomer]
+    serializer_class = CustomerSerializer
+
+    def get_object(self):
+        return self.request.user
+
 #addresses
-@api_view(['POST', 'GET'])
-@authentication_classes([JWTTokenUserAuthentication])
-@permission_classes([IsAuthenticated])
-def address(request):
-    user = request.user
-    
-    if request.method == 'GET':
-        
-        addresses = Address.objects.filter(Customer=user)
-        serializer = AddressSerializer(addresses, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    elif request.method == 'POST':
-        
-        serializer = AddressSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(Customer=user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+class AddressListCreateView(ListCreateAPIView):
+    queryset = Address.objects.all()
+    authentication_classes = [JWTTokenUserAuthentication]
+    permission_classes = [IsCustomer]
+    serializer_class = AddressSerializer
+
+    def get_queryset(self):
+        return Address.objects.filter(Customer=self.request.user)
+
+class AddressRetrieveUpdateView(RetrieveUpdateDestroyAPIView):
+    queryset = Address.objects.all()
+    authentication_classes = [JWTTokenUserAuthentication]
+    permission_classes = [IsCustomer]
+    serializer_class = AddressSerializer
+
+    def get_queryset(self):
+        return Address.objects.filter(Customer=self.request.user)

@@ -244,7 +244,7 @@ def request_password_reset(request):
     token = default_token_generator.make_token(user)
     uid = urlsafe_base64_encode(force_bytes(user.pk))
 
-    password_reset_url = f'http://example.com/password_reset/{uid}/{token}/'
+    password_reset_url = f'http://127.0.0.1:8000/password_reset/{uid}/{token}/'
 
     subject = 'Password Reset Request'
     message = f'Please use the link below to reset your password:\n{password_reset_url}'

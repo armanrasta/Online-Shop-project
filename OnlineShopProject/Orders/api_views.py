@@ -18,7 +18,7 @@ def cart_to_order(request):
         order = Order.objects.create(customer=user, status=Order.StatusChoices.InProgress)
         for cart_item in cart.items.all():
             OrderItem.objects.create(order=order, item=cart_item.product, quantity=cart_item.quantity)
-            # Update product stock
+            #Update product stock
             cart_item.product.quantity -= cart_item.quantity
             cart_item.product.save()
 

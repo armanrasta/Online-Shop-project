@@ -39,7 +39,7 @@ class Address(models.Model):
     full_address = models.TextField()
     lat = models.FloatField()
     lon = models.FloatField()
-    postal_code = models.IntegerField(max_length=10)
+    postal_code = models.IntegerField()
     extra_description = models.TextField()
 
     def __str__(self):

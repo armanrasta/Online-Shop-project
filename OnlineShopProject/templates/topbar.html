@@ -12,12 +12,24 @@
     <div class="col-lg-6 text-center text-lg-right">
       <div class="d-inline-flex align-items-center">
         <div class="btn-group">
+          {% if user.is_authenticated %}
+            <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-toggle="dropdown">My Account</button>
+            <div class="dropdown-menu dropdown-menu-right">
+              <!-- User dashboard options -->
+              <!-- Add your user dashboard links here -->
+              <button href="{% url 'dashboard' %}" class="dropdown-item">Dashboard</button>
+              <button href="{% url 'logout' %}" class="dropdown-item">Logout</button>
+            </div>
+          {% else %}
           <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-toggle="dropdown">My Account</button>
-          <div class="dropdown-menu dropdown-menu-right">
-            <button class="dropdown-item" type="button">Sign in</button>
-            <button class="dropdown-item" type="button">Sign up</button>
-          </div>
+            <div class="dropdown-menu dropdown-menu-right">
+            <!-- Sign-in and Sign-up buttons -->
+              <button class="btn btn-sm btn-light" type="button" onclick="location.href='{% url 'login' %}'">Sign in</button>
+              <button class="btn btn-sm btn-light" type="button" onclick="location.href='{% url 'signup' %}'">Sign up</button>
+            </div>
+          {% endif %}
         </div>
+        
         <div class="btn-group mx-2">
           <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-toggle="dropdown">USD</button>
           <div class="dropdown-menu dropdown-menu-right">

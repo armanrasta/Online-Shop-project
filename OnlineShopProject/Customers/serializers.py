@@ -2,6 +2,14 @@ from rest_framework import serializers
 from .models import Cart, CartItem, Customer,Address
 
 
+class CustomerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer
+        fields = ['username', 'first_name', 'last_name', 'email', 'phone_number']
+        extra_kwargs = {
+            'username': {'read_only': True}
+        }
+        
 class CartItemSerializer(serializers.ModelSerializer):
     product_name = serializers.ReadOnlyField(source='product.name')
     product_price = serializers.ReadOnlyField(source='product.price')
