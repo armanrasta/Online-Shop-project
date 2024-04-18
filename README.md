@@ -15,7 +15,7 @@ This is an e-commerce project built with Django and Django Rest Framework (DRF).
 1. Clone the repository:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/armanrasta/Online-Shop-project.git
 ```
 2. Install the dependencies:
 ```python
