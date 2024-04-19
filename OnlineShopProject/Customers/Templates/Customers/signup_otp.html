@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup OTP</title>
+</head>
+<body>
+    <div class="container">
+        <h2>Signup OTP</h2>
+        <div>
+            <label for="otp">OTP:</label>
+            <input type="text" id="otp">
+        </div>
+        <button id="createAccountButton">Create Account</button>
+    </div>
+
+    <script>
+        function createAccount() {
+            let otp = document.getElementById('otp').value;
+            let userId = sessionStorage.getItem('user_id');
+            
+            fetch('http://127.0.0.1:8000/api/signup/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    otp: otp,
+                    user_id: userId,
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.success);
+                    window.location.href = "http://127.0.0.1:8000/login/"; 
+                } else {
+                    console.error('Error:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+        document.getElementById('createAccountButton').addEventListener('click', createAccount);
+    </script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup</title>
+</head>
+<body>
+    <div class="container">
+        <h2>Signup</h2>
+        <div>
+            <label for="username">Username:</label>
+            <input type="text" id="username">
+        </div>
+        <div>
+            <label for="phone_number">Phone Number:</label>
+            <input type="text" id="phone_number">
+        </div>
+        <div>
+            <label for="first_name">First Name:</label>
+            <input type="text" id="first_name">
+        </div>
+        <div>
+            <label for="last_name">Last Name:</label>
+            <input type="text" id="last_name">
+        </div>
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email">
+        </div>
+        <div>
+            <label for="password">Password:</label>
+            <input type="password" id="password">
+        </div>
+        <button id="signUpButton">Signup</button>
+    </div>
+
+    <script>
+        function signUpOTP() {
+            let username = document.getElementById('username').value;
+            let phoneNumber = document.getElementById('phone_number').value;
+            let firstName = document.getElementById('first_name').value;
+            let lastName = document.getElementById('last_name').value;
+            let email = document.getElementById('email').value;
+            let password = document.getElementById('password').value;
+            
+            fetch('http://127.0.0.1:8000/api/signup-otp/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: username,
+                    phone_number :phoneNumber,
+                    first_name: firstName,
+                    last_name: lastName,
+                    email: email,
+                    password: password,
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.user_id) {
+                    sessionStorage.setItem('user_id', data.user_id);
+                    alert(data.success);
+                    
+                    window.location.href = "http://127.0.0.1:8000/signup-otp"; 
+                } else {
+                    console.error('Error:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+        document.getElementById('signUpButton').addEventListener('click', signUpOTP);
+    </script>
+</body>
+</html>

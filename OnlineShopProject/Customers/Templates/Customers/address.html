@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+  <!-- Checkout Start -->
+  <div class="container-fluid">
+    <div class="row px-xl-5">
+      <div class="col-lg-8">
+        <h5 class="section-title position-relative text-uppercase mb-3"><span class="bg-secondary pr-3">Billing Address</span></h5>
+        <div class="bg-light p-30 mb-5">
+          <div class="row">
+            <div class="col-md-6 form-group">
+              <label>Postal Code</label>
+              <input id="postal-code" class="form-control" type="text" placeholder="123" />
+            </div>
+            <div class="col-md-6 form-group">
+              <label>Country</label>
+              <select class="custom-select">
+                <option selected>Iran</option>
+                <option>null</option>
+              </select>
+            </div>
+            <div class="col-md-6 form-group">
+              <label>State</label>
+              <input id="state" class="form-control" type="text" placeholder="New York" />
+            </div>
+            <div class="col-md-6 form-group">
+              <label>City</label>
+              <input id="city" class="form-control" type="text" placeholder="New York" />
+            </div>
+            <div class="col-md-12 form-group">
+              <label>Full Address</label>
+              <textarea id="full-address" class="form-control" type="text" placeholder="123 Street"></textarea>
+            </div>
+            <div class="col-md-12 form-group">
+              <label>Extra Description</label>
+              <textarea id="extra-description" class="form-control" type="text" placeholder="info"></textarea>
+            </div>
+            <div class="col-md-12">
+              <button class="btn btn-block btn-primary font-weight-bold py-3">Submit Address</button>
+            </div>
+          </div>
+        </div>
+        <div class="collapse mb-5" id="shipping-address">
+          <h5 class="section-title position-relative text-uppercase mb-3"><span class="bg-secondary pr-3">Shipping Address</span></h5>
+          <div class="bg-light p-30">
+            <div class="row">
+              <div class="col-md-6 form-group">
+                <label>Address Line 1</label>
+                <input class="form-control" type="text" placeholder="123 Street" />
+              </div>
+              <div class="col-md-6 form-group">
+                <label>Address Line 2</label>
+                <input class="form-control" type="text" placeholder="123 Street" />
+              </div>
+              <div class="col-md-6 form-group">
+                <label>Country</label>
+                <select class="custom-select">
+                  <option selected>United States</option>
+                  <option>Iran</option>
+                  <option>Albania</option>
+                  <option>Algeria</option>
+                </select>
+              </div>
+              <div class="col-md-6 form-group">
+                <label>City</label>
+                <input class="form-control" type="text" placeholder="New York" />
+              </div>
+              <div class="col-md-6 form-group">
+                <label>State</label>
+                <input class="form-control" type="text" placeholder="New York" />
+              </div>
+              <div class="col-md-6 form-group">
+                <label>Postal Code</label>
+                <input class="form-control" type="text" placeholder="123" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+        
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const submitAddressBtn = document.getElementById('submit-address-btn');
+      submitAddressBtn.addEventListener('click', function() {
+        const postalCode = document.getElementById('postal-code').value;
+        const city = document.getElementById('city').value;
+        const state = document.getElementById('state').value;
+        const extra_description = document.getElementById('extra-description').value;
+        const full_address = document.getElementById('full-address').value;
+
+        // Make a POST request to submit the address
+        fetch('http://127.0.0.1:8000/api/addresses/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+          },
+          body: JSON.stringify({
+            postal_code: postal_Code,
+            extra_description: extra_description,
+            state: state,
+            city: city,
+            full_address: full_address
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log(data);
+          
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+      });
+    });
+  </script>
+  <!-- Checkout End -->
+{% endblock %}

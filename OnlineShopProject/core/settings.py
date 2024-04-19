@@ -25,7 +25,9 @@ SECRET_KEY = 'django-insecure-_c0&y_rn(=)cf_z7q&pn657ql9(zk-dz7qwq!bmahj^n278qc+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+]
 
 
 # Application definition
@@ -36,10 +38,12 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'django.contrib.staticfiles',    
     'rest_framework',
-    'Costumers',
-    'Product', 
+    'rest_framework_simplejwt',
+    'Customers',
+    'Operating', 
+    'Product',
     'Orders',
     'core',
 ]
@@ -50,9 +54,9 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'costumers.middlewares.DoSMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -60,7 +64,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [BASE_DIR / 'Templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -75,23 +79,35 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
+#rest_framework
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+     'DEFAULT_PAGINATION_CLASS':'rest_framework.pagination.PageNumberPagination',
+     'PAGE_SIZE': 20
+}
+
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=15),  
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': BASE_DIR / 'db.sqlite3',
-    # }
     
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'online-shop-project',
+        'NAME': 'online-shop',
         'USER': 'root',
-        'PASSWORD': 'ldpbw68UkPKMuqpALxb7PDjN',
-        'HOST': 'sinai.liara.cloud',
-        'PORT': '31299',
+        'PASSWORD': 'bOoH2XHWh4xIvFjjrxO3HWQR',
+        'HOST': 'chogolisa.liara.cloud',
+        'PORT': '33393',
     }
 }
 
@@ -126,7 +142,7 @@ PASSWORD_HASHERS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Tehran'
 
 USE_I18N = True
 
@@ -137,6 +153,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'Media'
 
 STATICFILES_DIRS = [
     BASE_DIR / "static",
@@ -148,10 +166,19 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # email config
-
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'armanrostamiar@gmail.com'
-EMAIL_HOST_PASSWORD = '123456789A.'
+EMAIL_HOST_USER = 'armanrostami1000@gmail.com'
+EMAIL_HOST_PASSWORD = 'cnoygjdvspntplxo'
+
+# #auth 
+AUTH_USER_MODEL = 'Customers.Customer'
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'Customers.api_views.CustomerAuthBackEnd.CustomerBackend']
+
+
+#ZARINAPL
+merchant_id = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'
