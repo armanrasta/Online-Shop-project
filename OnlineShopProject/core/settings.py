@@ -25,7 +25,8 @@ SECRET_KEY = 'django-insecure-_c0&y_rn(=)cf_z7q&pn657ql9(zk-dz7qwq!bmahj^n278qc+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost',
+                 '127.0.0.1']
 
 
 # Application definition
@@ -36,13 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
-    
-    'django_otp',
-    'django_otp.plugins.otp_totp',
-    'django_otp.plugins.otp_hotp',
-    'django_otp.plugins.otp_static',
-    
+    'django.contrib.staticfiles',    
     'rest_framework',
     'rest_framework_simplejwt',
     'Customers',
@@ -61,7 +56,6 @@ MIDDLEWARE = [
     'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'Customers.middlewares.DoSMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -87,35 +81,17 @@ WSGI_APPLICATION = 'core.wsgi.application'
 #rest_framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
-        #'rest_framework.authentication.TokenAuthentication',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        #'rest_framework.permissions.IsAuthenticated',
-        # 'rest_framework.permissions.IsAdminUser',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     ],
      'DEFAULT_PAGINATION_CLASS':'rest_framework.pagination.PageNumberPagination',
      'PAGE_SIZE': 20
-    
 }
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': BASE_DIR / 'db.sqlite3',
-    # }
-    
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.postgresql',
-    #     'NAME': 'online-shop-project',
-    #     'USER': 'root',
-    #     'PASSWORD': 'ldpbw68UkPKMuqpALxb7PDjN',
-    #     'HOST': 'sinai.liara.cloud',
-    #     'PORT': '31299',
-    # }
     
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -170,7 +146,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 MEDIA_URL = 'media/'
-MEDIA_ROOT= BASE_DIR / 'media'
+MEDIA_ROOT = BASE_DIR / 'Media'
 
 STATICFILES_DIRS = [
     BASE_DIR / "static",
@@ -189,7 +165,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'armanrostami1000@gmail.com'
 EMAIL_HOST_PASSWORD = 'cnoygjdvspntplxo'
 
-#auth 
+# #auth 
 AUTH_USER_MODEL = 'Customers.Customer'
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',

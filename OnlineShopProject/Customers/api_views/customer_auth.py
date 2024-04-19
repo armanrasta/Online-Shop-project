@@ -10,6 +10,7 @@ from django.utils.crypto import get_random_string
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from ..models import Customer, Cart, CartItem
+from ..permissions import IsCustomer
 from Product.models import Product
 from core.RedisConf import redis_client
 import uuid
@@ -112,7 +113,7 @@ def create_account(request):
 def login_otp(request):
     
     if request.method == 'POST':
-        email_or_username = request.data.get('username-or-email')
+        email_or_username = request.data.get('username_or_email')
         password = request.data.get('password')
         
         #checking if the client entered username or email
@@ -276,3 +277,16 @@ def reset_password(request, uidb64, token):
         return Response({'success': 'Password has been reset successfully'}, status=status.HTTP_200_OK)
     else:
         return Response({'error': 'Invalid token or UID'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
+class CheckAuthAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsCustomer]
+
+    def get(self, request):
+        return Response({'authenticated': True})

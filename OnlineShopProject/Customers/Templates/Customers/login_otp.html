@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login OTP</title>
+</head>
+<body>
+    <div class="container">
+        
+        <div>
+            <label for="OTP">OTP:</label>
+            <input type="text" id="OTP">
+        </div>
+        <button id="loginButton">Login</button>
+    </div>
+
+
+    <script>
+        function login() {
+            let OTP = document.getElementById('OTP').value;
+            let uuid = sessionStorage.getItem('user-id');
+            fetch('http://127.0.0.1:8000/api/login/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    "otp": OTP,
+                    "user-id": uuid
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.access) {
+                        localStorage.setItem('accessToken', data.access);
+                        localStorage.setItem('refreshToken', data.refresh);
+                        alert('Welcome to Online Shop :)');
+                        sessionStorage.removeItem('user-id');
+                        window.location.href = "http://127.0.0.1:8000/"; 
+                    } else {
+                        console.error('Error:', data.error);
+                        alert(data.error);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        }
+        document.getElementById('loginButton').addEventListener('click', login);
+    </script>
+</body>
+</html>

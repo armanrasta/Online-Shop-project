@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Login</h2>
+      <div>
+        <label for="emailOrUsername">Email or Username:</label>
+        <input type="text" id="emailOrUsername" />
+      </div>
+      <div>
+        <label for="password">Password:</label>
+        <input type="password" id="password" />
+      </div>
+      <button id="otpRequestButton">Request OTP</button>
+    </div>
+
+    <script>
+      function loginOtp() {
+        let emailOrUsername = document.getElementById('emailOrUsername').value
+        let password = document.getElementById('password').value
+      
+        fetch('http://127.0.0.1:8000/api/login-otp/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            username_or_email: emailOrUsername,
+            password: password
+          })
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              alert(data.success)
+              sessionStorage.setItem('user-id', data.user_id)
+              window.location.href = 'http://127.0.0.1:8000/login-otp'
+            } else {
+              console.error('Error:', data.error)
+              alert(data.error)
+            }
+          })
+          .catch((error) => {
+            console.error('Error:', error)
+          })
+      }
+      document.getElementById('otpRequestButton').addEventListener('click', loginOtp)
+    </script>
+  </body>
+</html>

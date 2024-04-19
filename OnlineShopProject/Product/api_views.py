@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from .models import Product,Category,DiscountCodes,Comment
-from .serializers import ProductSerializer,CategorySerializer,DiscountSerializer,CommentSerializer
+from .serializers import ProductSerializer,CategorySerializer,DiscountSerializer,CommentSerializer, ProducteDetailSerializer
 from Customers.serializers import CartSerializer
 
 #category
@@ -76,6 +76,10 @@ def products_by_category(request, category_name):
     serializer = ProductSerializer(products, many=True)
     return Response(serializer.data)
 
+class ProductDetailView(generics.RetrieveAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProducteDetailSerializer
+
 #discount
 @api_view(['GET', 'POST', 'PUT'])
 def discount_codes_list(request):
@@ -142,9 +146,6 @@ class ProductList(generics.ListAPIView):
     serializer_class = ProductSerializer
     pagination_class = PageNumberPagination
 
-class ProductDetail(generics.RetrieveAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
 
 class ProductCreateAPIView(APIView):  #for admin panel
     def post(self, request):
