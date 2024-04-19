@@ -78,7 +78,7 @@
         category.subcats.forEach((subcategory) => {
           const dropdownSubLink = document.createElement('a');
           dropdownSubLink.classList.add('dropdown-item');
-          dropdownSubLink.href = '/shop/' + subcategory.name; // Assuming there's a slug field
+          dropdownSubLink.href = '/shop/' + subcategory.name;
           dropdownSubLink.textContent = subcategory.name;
           dropdownMenu.appendChild(dropdownSubLink);
         });

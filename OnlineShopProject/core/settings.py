@@ -25,8 +25,9 @@ SECRET_KEY = 'django-insecure-_c0&y_rn(=)cf_z7q&pn657ql9(zk-dz7qwq!bmahj^n278qc+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost',
-                 '127.0.0.1']
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+]
 
 
 # Application definition
@@ -86,6 +87,13 @@ REST_FRAMEWORK = {
     ],
      'DEFAULT_PAGINATION_CLASS':'rest_framework.pagination.PageNumberPagination',
      'PAGE_SIZE': 20
+}
+
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=15),  
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
 }
 
 # Database

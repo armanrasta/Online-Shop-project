@@ -51,11 +51,11 @@
       </a>
     </div>
     <div class="col-lg-4 col-6 text-left">
-      <form action="">
+      <form id="productSearchForm">
         <div class="input-group">
-          <input type="text" class="form-control" placeholder="Search for products" />
+          <input id="searchInput" type="text" class="form-control" placeholder="Search for products" />
           <div class="input-group-append">
-            <span class="input-group-text bg-transparent text-primary"><i class="fa fa-search"></i></span>
+            <button id="searchButton" class="btn input-group-text bg-transparent text-primary" type="submit"><i class="fa fa-search"></i></button>
           </div>
         </div>
       </form>
@@ -86,8 +86,9 @@
             '<button type="button" class="btn btn-sm btn-light dropdown-toggle" data-toggle="dropdown">My Account</button>' +
             '<div class="dropdown-menu dropdown-menu-right">' +
             '<button href="/dashboard" class="dropdown-item">Dashboard</button>' +
-            '<button href="/logout" class="dropdown-item">Logout</button>' +
+            '<button id="logoutButton" class="dropdown-item">Logout</button>' +
             '</div>';
+            document.getElementById('logoutButton').addEventListener('click', logoutUser);
         } else {
           document.getElementById('myAccountDropdown').innerHTML =
             '<button type="button" class="btn btn-sm btn-light dropdown-toggle" data-toggle="dropdown">My Account</button>' +
@@ -102,6 +103,37 @@
       });
     }
 
+    function logoutUser() {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      
+      window.location.href = 'http://127.0.0.1:8000/';
+    }
     updateMyAccountDropdown();
+  });
+
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    
+    function handleFormSubmit(event) {
+      event.preventDefault(); 
+      const searchQuery = document.getElementById('searchInput').value.trim();
+      
+      const apiUrl = `http://127.0.0.1:8000/api/search-products/?name_contains=${searchQuery}`;
+      
+      fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+          
+          console.log('Search Results:', data);
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    }
+    
+    document.getElementById('productSearchForm').addEventListener('submit', handleFormSubmit);
   });
 </script>

@@ -51,7 +51,7 @@ class CustomerCartSerializer(serializers.ModelSerializer): #un necesarry
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
-        fields = ['state', 'city', 'full_address', 'lat', 'lon', 'postal_code', 'extra_description']
+        fields = ['state', 'city', 'full_address', 'postal_code', 'extra_description']
         
     def create(self, validated_data):
         validated_data['Customer'] = self.context['request'].user

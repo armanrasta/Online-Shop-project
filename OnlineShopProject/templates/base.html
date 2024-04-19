@@ -53,7 +53,56 @@
     <!-- Contact Javascript File -->
     <script src={% static "mail/jqBootstrapValidation.min.js" %}></script>
     <script src={% static "mail/contact.js" %}></script>
-    
+    <script>
+        // Function to get the access token from localStorage
+        function getAccessToken() {
+          return localStorage.getItem('accessToken');
+        }
+      
+        function refreshAccessToken() {
+          const refreshToken = localStorage.getItem('refreshToken');
+
+          if (!refreshToken) {
+            console.error('No refresh token available.');
+            return;
+          }
+      
+
+          const data = { refresh: refreshToken };
+      
+        
+          fetch('http://127.0.0.1/api/refresh-token/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.access) {
+            
+              localStorage.setItem('accessToken', data.access);
+              console.log('Access token refreshed successfully.');
+              
+            } else {
+              console.error('Failed to refresh the access token.');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+        }
+      
+        const accessToken = getAccessToken();
+        if (accessToken) {
+          console.log('Access Token:', accessToken);
+          refreshAccessToken();
+        } else {
+          console.error('No access token found.');
+        }
+      </script>
+      
     
     <!-- Template Javascript -->
     <script src={% static "js/main.js" %}></script>
